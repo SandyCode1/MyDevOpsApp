@@ -47,3 +47,13 @@ steps:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
       ArtifactName: 'drop'
       publishLocation: 'Container'
+
+  # Commit and push changes (if needed)
+  - script: |
+      git config --global user.email "call8sandeep@gmail.com"
+      git config --global user.name "SandyCode1"
+      git add -A
+      git commit -m "Auto-commit changes after build"
+      git push origin main
+    displayName: 'Commit and Push Changes'
+    condition: succeeded()  # Ensure this only runs if previous tasks succeed
