@@ -1,0 +1,49 @@
+trigger:
+  branches:
+    include:
+      - main  # Or the branch you want to use
+
+pool:
+  vmImage: 'ubuntu-latest'  # Use 'windows-latest' if preferred
+
+steps:
+  # Install .NET SDK (make sure to use version 9.0 for .NET 9)
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '9.x'
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  # Restore dependencies
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+
+  # Build the .NET Core project
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: '**/*.csproj'
+      arguments: '--configuration Release'
+
+  # Run tests (if applicable)
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'test'
+      projects: '**/*.csproj'
+
+  # Publish the project
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'publish'
+      projects: '**/*.csproj'
+      publishWebProjects: false
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/publish'
+
+  # Publish build artifacts
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
